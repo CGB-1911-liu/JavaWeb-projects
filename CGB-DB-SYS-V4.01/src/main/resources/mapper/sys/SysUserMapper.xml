@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysUserDao">
+
+
+	<sql id="queryWhereId">
+		from sys_users
+		<where>
+			<if test="username!=null and username!=''">
+				username like concat("%",#{username},"%")
+			</if>
+		</where>
+	</sql>
+
+	<!-- 基于条件查询日志表中的记录总数 -->
+	<select id="getRowCount" resultType="int">
+		select count(*)
+		<include refid="queryWhereId" />
+	</select>
+
+	<!-- 一般应用于many2one或one2one做关联查询 
+	在当前应用是基于deptId查询部门信息并将其 
+	存储到SysUserDeptVo对象的sysDept属性中。 -->
+
+	<resultMap id="sysUserDeptVo"
+		type="com.cy.pj.sys.vo.SysUserDeptVo">
+		<!-- association一般应用于many2one或one2one做关联查询
+		我们要基于查询到的部门id再次查询用户所属的部门
+		最终将部门信息封装到SysUserDeptVo对象的sysDept属性上  -->
+		<association property="sysDept"
+					column="deptId"
+					select="com.cy.pj.sys.dao.SysDeptDao.findById">
+		</association>
+		
+		</resultMap>
+
+	<!-- 基于条件查询当前页记录信息 -->
+	<select id="findPageObjects" resultMap="sysUserDeptVo">
+		select *
+		<include refid="queryWhereId" />
+		order by createdTime desc
+		limit #{startIndex},#{pageSize}
+	</select>
+
+	<update id="validById">
+		update sys_users
+		set valid=#{valid},
+		 	modifiedUser=#{modifiedUser},
+		 	modifiedTime=now()
+		where id=#{id}
+	</update>
+	
+  <insert id="insertObject"
+           parameterType="com.cy.pj.sys.entity.SysUser"
+           useGeneratedKeys="true"
+           keyProperty="id">
+      insert into sys_users
+      (username,password,deptId,email,mobile,salt,valid,
+      createdTime,modifiedTime,createdUser,modifiedUser)
+      values
+    (#{username},#{password},#{deptId},#{email},#{mobile},#{salt},#{valid},
+      now(),now(),#{createdUser},#{modifiedUser})
+   </insert>
+
+</mapper>
