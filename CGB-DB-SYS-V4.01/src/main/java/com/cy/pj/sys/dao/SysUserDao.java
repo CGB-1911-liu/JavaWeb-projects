@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.cy.pj.common.vo.JsonResult;
 import com.cy.pj.sys.entity.SysUser;
 import com.cy.pj.sys.vo.SysUserDeptVo;
 
@@ -23,4 +24,11 @@ public interface SysUserDao {
 			String modifiedUser);
 	
 	int insertObject(SysUser entity);
+	
+	
+	SysUserDeptVo findObjectById(Integer id);
+	
+	int updateObject(SysUser entity);
+	
+
 }
